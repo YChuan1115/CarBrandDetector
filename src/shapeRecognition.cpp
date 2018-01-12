@@ -149,3 +149,9 @@ double calculateM7(cv::Mat I){
     double M7 = (M20*M02 - cv::pow(M11, 2)) / cv::pow(m00, 4);
     return M7;
 }
+
+double getW3(cv::Mat I){
+    int S = calcArea(I);
+    int L = calcCircumference(I);
+    return calcW3((double)S, (double)L);
+}

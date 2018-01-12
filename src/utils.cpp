@@ -90,6 +90,11 @@ template <class T,size_t filterDimension>
 cv::Mat convolutionSingleChannel(const cv::Mat I, matrix<T,filterDimension,filterDimension>(filterArray)){
     cv::Mat _I = I;
     cv::Mat filteredI = cv::Mat(I.rows, I.cols, CV_8UC1);
+    for (int i = 0; i < I.rows ; ++i) {
+        for (int j = 0; j < I.cols; ++j) {
+            filteredI.at<uchar>(i,j) = I.at<uchar>(i,j);
+        }
+    }
     for (int i = filterDimension; i < I.rows - filterDimension; ++i){
         for (int j = filterDimension; j < I.cols - filterDimension; ++j){
 

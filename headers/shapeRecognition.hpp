@@ -14,5 +14,6 @@ double calcmpq(cv::Mat I, int p, int q);
 void calculateParameters(cv::Mat I);
 double calculateM1(cv::Mat I);
 double calculateM7(cv::Mat I);
+double getW3(cv::Mat I);
 
 #endif //CARBRANDDETECTOR_SHAPERECOGNITION_HPP
