@@ -49,6 +49,8 @@ float calculateDistance( const float x1, const float x2, const float y1, const f
 
 std::vector<PairOfPoints> getPairsWithDistanceInRange(const std::vector<Point> points, const float minDistance, const float maxDistance);
 
+std::vector<PairOfPoints> getPairsWithAngleInSpan(const std::vector<PairOfPoints> pairs, const float middleRotationDeg, const float rotationSpanDeg);
+
 float degToRad( float degrees);
 
 

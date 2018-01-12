@@ -34,21 +34,23 @@ std::vector<float> computePairwiseDistances(const std::vector<Point> points){
 std::vector<PairOfPoints> getPairsWithAngleInSpan(const std::vector<PairOfPoints> pairs, const float middleRotationDeg, const float rotationSpanDeg){
     std::vector<PairOfPoints> filteredPairs;
 
-    float tanLow = degToRad(middleRotationDeg-rotationSpanDeg);
-    float tanHigh = degToRad(middleRotationDeg+rotationSpanDeg);
+    float tanLow = tan(degToRad(middleRotationDeg-rotationSpanDeg));
+    float tanHigh = tan(degToRad(middleRotationDeg+rotationSpanDeg));
 
     for(auto && pair : pairs){
         Point point1 = pair.first;
         Point point2 = pair.second;
-        float pairAngleRad = static_cast<float>(point1.y-point2.y)/ static_cast<float>(point1.x-point2.x);
+        float tangent = static_cast<float>(point1.y-point2.y)/ static_cast<float>(point1.x-point2.x);
         if( tanLow < tanHigh){
-            if(pairAngleRad > tanLow && pairAngleRad < tanHigh)
+            if(tangent > tanLow && tangent < tanHigh)
                 filteredPairs.push_back(pair);
         }else{
-            if(pairAngleRad > tanLow || pairAngleRad < tanHigh)
+            if(tangent > tanLow || tangent < tanHigh)
                 filteredPairs.push_back(pair);
         }
     }
+
+    return filteredPairs;
 
 }
 

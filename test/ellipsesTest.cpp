@@ -48,3 +48,18 @@ TEST_CASE( "Calculate pairwise distances between 3 points (including distances w
 
     REQUIRE( pairs == expectedPairs);
 }
+
+TEST_CASE("Filter out all pairs with angle in range of 40-90 deegrees") {
+    std::vector<PairOfPoints> pairs;
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(2,2)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(1,0)));
+    std::vector<PairOfPoints> filteringResult = getPairsWithAngleInSpan(pairs, 65.0f,25.0f);
+
+    std::vector<PairOfPoints> expected;
+    expected.emplace_back(std::make_pair(Point(0,0),Point(2,2)));
+    expected.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
+
+    REQUIRE( filteringResult == expected );
+
+}
