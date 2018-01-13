@@ -8,13 +8,14 @@
 #include "utils.hpp"
 #include "shapeRecognition.hpp"
 #include "kernels.hpp"
+#include "ellipses.hpp"
+#include "preprocessing.hpp"
 
-using namespace cv;
 
 
 const int SCALE = 10;
 
-Mat levels(cv::Mat image){
+cv::Mat levels(cv::Mat image){
     cv::Mat levels = cv::Mat(image.rows,image.cols, CV_8UC1);
     for(int i=0; i<image.rows; ++i){
         for(int j=0; j<image.cols; ++j){
@@ -28,39 +29,7 @@ Mat levels(cv::Mat image){
     return levels;
 }
 
-Mat preprocessing(cv::Mat image){
-    cv::Mat grayscale = conv2Grey(image);
-    //cv::Mat leveled = levels(grayscale);
-    matrix<float,3,3> gaussianKernel = gaussian_kernel(1.0f);
-    cv::Mat blurred = convolutionSingleChannel<float,3>(grayscale,gaussianKernel);
-    cv::Mat sobelX = convolutionSingleChannel<int,3>(blurred, sobelx);
-    cv::Mat sobelY = convolutionSingleChannel<int,3>(blurred, sobely);
-    cv::Mat magn = magnitude(sobelX,sobelY);
-    cv::Mat binary;
-    threshold(magn, binary, 127,255, THRESH_BINARY);
-    int dilation_type = MORPH_RECT;
-    int dilation_size = 1;
-    Mat element = getStructuringElement( dilation_type,
-                                         Size( 2*dilation_size + 1, 2*dilation_size+1 ),
-                                         Point( dilation_size, dilation_size ) );
-    /// Apply the dilation operation
- //   dilate( binary, binary, element );
- //   dilate( binary, binary, element );
-  //  dilate( binary, binary, element );
- //   imshow("afterDilation",binary);
-  //  erode(binary,binary,element);
- //   imshow("afterClosing",binary);
-//      imshow("leveled", leveled);
-   // morphologyEx(binary, binary, MORPH_CLOSE);
-//    cv::imshow("original", image);
-//    cv::imshow("grayscale", grayscale);
-//    cv::imshow("blurred", blurred);
-//    cv::imshow("sobelX", sobelX);
-//    cv::imshow("sobelY",sobelY);
-//    cv::imshow("magn",magn);
-//    cv::waitKey(-1);
-    return binary;
-}
+
 
 
 double maxHumMoments[7] = {0.0};
@@ -92,7 +61,7 @@ void shapeMomentsAnalysis(){
             newShape = conv2Grey(newShape);
             newShape = preprocessing(newShape);
             cv::Mat largerShape;
-            resize(newShape,largerShape, Size(), SCALE,SCALE);
+            resize(newShape,largerShape, cv::Size(), SCALE,SCALE);
             shapes.push_back(largerShape);
             std::cout << "Dodano plik: " << path << std::endl;
         }else{
@@ -105,9 +74,9 @@ void shapeMomentsAnalysis(){
        // std::cout<< "Calculating parameters for file: " << paths.at(i) << std::endl;
        // calculateParameters(shapes.at(i));
 
-        Moments moments1 = moments(shapes.at(i), true);
+        cv::Moments moments1 = moments(shapes.at(i), true);
         double huMoments[7];
-        HuMoments(moments1,huMoments);
+        cv::HuMoments(moments1,huMoments);
         for( int j=0; j<7; ++j){
             if( huMoments[j] > maxHumMoments[j])
                 maxHumMoments[j] = huMoments[j];
@@ -119,16 +88,16 @@ void shapeMomentsAnalysis(){
     }
 }
 
-bool findLogo(Mat area){
+bool findLogo(cv::Mat area){
     bool value = true;
-    Mat scaledArea;
-    resize(area,scaledArea, Size(), SCALE,SCALE);
+    cv:: Mat scaledArea;
+    cv::resize(area,scaledArea, cv::Size(), SCALE,SCALE);
 //    double M1 = calculateM1(area);
 //    double M7 = calculateM7(area);
     double W3 = getW3(scaledArea);
-    Moments moments1 = moments(scaledArea, true);
+    cv::Moments moments1 = moments(scaledArea, true);
     double huMoments[7];
-    HuMoments(moments1,huMoments);
+    cv::HuMoments(moments1,huMoments);
     std::cout << "Scan area" << std::endl;
     for( int j=0; j<3; ++j){
         //std::cout << std::setw(30) << " HuMoment #" << j << " : " << huMoments[j];
@@ -139,46 +108,46 @@ bool findLogo(Mat area){
     return value;
 }
 
-Mat naiveScan(Mat image){
+cv::Mat naiveScan(cv::Mat image , cv::Mat original_image){
     int imageHeight = image.rows;
     int imageWidth = image.cols;
-    int scanHeight = 80;
-    int scanWidth = 90;
+    int scanHeight = 100;
+    int scanWidth = 200;
     int scanOffsetX = scanWidth/2;
     int scanOffsetY = scanHeight/2;
-    int stepX = 20;
-    int stepY = 20;
+    int stepX = 40;
+    int stepY = 90;
     int scanPosX = 0;
     int scanPosY = 0;
-    Rect scanRect = Rect(scanPosX,scanPosY, scanWidth, scanHeight);
+    cv::Rect scanRect = cv::Rect(scanPosX,scanPosY, scanWidth, scanHeight);
     int counter = 0;
 
     int top = (int)(0.1*scanHeight); int bottom = top;
     int left = (int)(0.1*scanWidth); int right = left;
 
     while(scanPosY < imageHeight-scanHeight-1){
-        Mat scanArea = image(scanRect);
+        cv::Mat scanArea = image(scanRect);
 //        Mat scanArea = image;
-
-        if(findLogo(scanArea)){
-            Rect border(cv::Point(0,0), scanArea.size());
-            Scalar color(255,255,255);
+        std::pair<bool, Point> result = find2Ellipses(scanArea);
+        if(result.first){
+            cv::Rect border(cv::Point(scanPosX+result.second.x,scanPosY+result.second.y), cv::Size(10,10));
+            cv::Scalar color(0,0,255);
             int thickness = 1;
-            rectangle(scanArea,border,color,thickness);
+            cv::rectangle(original_image, border, color, 5);
             std::cout << "Found logo at x: " << scanPosX << " y: " << scanPosY << std::endl;
         }
 
         if( scanPosX < imageWidth-scanWidth-1){
-            scanRect = Rect(scanPosX,scanPosY, scanWidth, scanHeight);
+            scanRect = cv::Rect(scanPosX,scanPosY, scanWidth, scanHeight);
             scanPosX += stepX;
         }else{
             scanPosX = 0;
             scanPosY += stepY;
-            scanRect = Rect(scanPosX,scanPosY, scanWidth, scanHeight);
+            scanRect = cv::Rect(scanPosX,scanPosY, scanWidth, scanHeight);
         }
         ++counter;
     }
-    return image;
+    return original_image;
 }
 
 void preprocessAndSaveScanArea(){
@@ -186,89 +155,89 @@ void preprocessAndSaveScanArea(){
 }
 
 void mainImageSearch(){
-    Mat originalImage = imread("../Photos/toyota4.jpg");
+    cv::Mat originalImage = cv::imread("../Photos/toylogolicense.jpg");
 
-    shapeMomentsAnalysis();
+   // shapeMomentsAnalysis();
 
-    Mat preprocessedImage = preprocessing(originalImage);
+    cv::Mat preprocessedImage = preprocessing(originalImage);
     //  imwrite("../Photos/results/toyPreProcessed.jpg", image);
-    Mat scannedImage = naiveScan(preprocessedImage);
+    cv::Mat scannedImage = naiveScan(preprocessedImage, originalImage);
 
 //    imshow("originalImage", originalImage);
-//    imshow("preprocessed", preprocessedImage);
-    imshow("scanResult", scannedImage);
+    cv::imshow("preprocessed", preprocessedImage);
+    cv::imshow("scanResult", scannedImage);
 }
 
 void tests(){
-    Mat originalImage = imread("../Photos/toyota_wzor.jpg");
+    cv::Mat originalImage = cv::imread("../Photos/toyota_wzor.jpg");
 
-    Mat greyscaleImage = conv2Grey(originalImage);
-    Mat binary;
-    threshold(greyscaleImage, binary, 127, 255, THRESH_BINARY);
-    int dilation_type = MORPH_RECT;
+    cv::Mat greyscaleImage = conv2Grey(originalImage);
+    cv::Mat binary;
+    cv::threshold(greyscaleImage, binary, 127, 255, cv::THRESH_BINARY);
+    int dilation_type = cv::MORPH_RECT;
     int dilation_size = 4;
-    Mat element = getStructuringElement( dilation_type,
-                                         Size( 2*dilation_size + 1, 2*dilation_size+1 ),
-                                         Point( dilation_size, dilation_size ) );
-    Mat dil1,dil2,dil3,dil4;
-    dilate(binary,dil1,element);
-    dilate(dil1,dil2,element);
-    dilate(dil2,dil3,element);
-    dilate(dil3,dil4,element);
-    imshow("dil1",dil1);
-    imshow("dil2",dil2);
-    imshow("dil3",dil3);
-    imshow("dil4",dil4);
+    cv::Mat element = cv::getStructuringElement( dilation_type,
+                                                 cv::Size( 2*dilation_size + 1, 2*dilation_size+1 ),
+                                                 cv::Point( dilation_size, dilation_size ) );
+    cv::Mat dil1,dil2,dil3,dil4;
+    cv::dilate(binary,dil1,element);
+    cv::dilate(dil1,dil2,element);
+    cv::dilate(dil2,dil3,element);
+    cv::dilate(dil3,dil4,element);
+    cv::imshow("dil1",dil1);
+    cv::imshow("dil2",dil2);
+    cv::imshow("dil3",dil3);
+    cv::imshow("dil4",dil4);
 
 }
 
-void saveSegmets(Mat image, std::string path){
+void saveSegmets(cv::Mat image, std::string path){
     int imageHeight = image.rows;
     int imageWidth = image.cols;
-    int scanHeight = 100;
-    int scanWidth = 200;
+    int scanHeight = 80;
+    int scanWidth = 150;
     int scanOffsetX = scanWidth/2;
     int scanOffsetY = scanHeight/2;
     int stepX = 30;
     int stepY = 30;
     int scanPosX = 0;
     int scanPosY = 0;
-    Rect scanRect = Rect(scanPosX,scanPosY, scanWidth, scanHeight);
+    cv::Rect scanRect = cv::Rect(scanPosX,scanPosY, scanWidth, scanHeight);
     int counter = 0;
 
     int top = (int)(0.1*scanHeight); int bottom = top;
     int left = (int)(0.1*scanWidth); int right = left;
 
     while(scanPosY < imageHeight-scanHeight-1){
-        Mat scanArea = image(scanRect);
+        cv::Mat scanArea = image(scanRect);
         std::string fullpath = path+std::to_string(counter);
         fullpath = fullpath + ".png";
-        imwrite(fullpath, scanArea);
+        cv::imwrite(fullpath, scanArea);
 
         if( scanPosX < imageWidth-scanWidth-1){
-            scanRect = Rect(scanPosX,scanPosY, scanWidth, scanHeight);
+            scanRect = cv::Rect(scanPosX,scanPosY, scanWidth, scanHeight);
             scanPosX += stepX;
         }else{
             scanPosX = 0;
             scanPosY += stepY;
-            scanRect = Rect(scanPosX,scanPosY, scanWidth, scanHeight);
+            scanRect = cv::Rect(scanPosX,scanPosY, scanWidth, scanHeight);
         }
         ++counter;
     }
 }
 
 void test2(){
-    Mat originalImage = imread("../Photos/toy2small.jpg");
-    Mat preprocessed = preprocessing(originalImage);
+    cv::Mat originalImage = cv::imread("../Photos/toy2small.jpg");
+    cv::Mat preprocessed = preprocessing(originalImage);
     saveSegmets(preprocessed, "../Photos/segments3/toyseg");
 }
 
 int main() {
 
 //    tests();
- //   mainImageSearch();
-    test2();
- //   waitKey(-1);
+    mainImageSearch();
+//    test2();
+    cv::waitKey(-1);
 
 
 

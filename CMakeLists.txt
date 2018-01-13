@@ -14,8 +14,8 @@ file(GLOB SOURCES
 file(GLOB TEST_SOURCES
         test/*cpp)
 
-add_executable(CarBrandDetector main/main.cpp ${SOURCES})
+add_executable(CarBrandDetector main/main.cpp ${SOURCES} )
 target_link_libraries( CarBrandDetector ${OpenCV_LIBS} )
 
-add_executable(CarBrandDetectorTest ${TEST_SOURCES} ${SOURCES})
+add_executable(CarBrandDetectorTest ${TEST_SOURCES} ${SOURCES} src/preprocessing.cpp)
 target_link_libraries( CarBrandDetectorTest ${OpenCV_LIBS} )

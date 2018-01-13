@@ -15,8 +15,8 @@
 #include <algorithm>
 
 struct EllipseDetection {
-    unsigned int x;
-    unsigned int y;
+    unsigned long x;
+    unsigned long y;
     float majorAxis;
     float minorAxis;
     float angle;
@@ -41,6 +41,8 @@ struct Point {
 };
 
 typedef std::pair<Point,Point> PairOfPoints;
+
+std::pair<bool, Point> find2Ellipses(const cv::Mat image);
 
 std::vector<EllipseDetection> ellipseDetection(const cv::Mat image, const EllipseDetectionParams params);
 

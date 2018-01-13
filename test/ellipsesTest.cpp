@@ -7,6 +7,7 @@
 #include "catch.hpp"
 
 #include "../headers/ellipses.hpp"
+#include "../headers/preprocessing.hpp"
 
 
 
@@ -83,4 +84,81 @@ TEST_CASE("Return random subset, but not smaller than minimal number of pairs ar
     pairs.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
     pairs.emplace_back(std::make_pair(Point(0,0),Point(1,0)));
     REQUIRE(getRandomSubsetOfPairs(pairs, 2, 2).size() <= 2*2);
+}
+
+TEST_CASE("Detect ellipse in toyota logo"){
+    cv::Mat color_image = cv::imread("../Photos/segments/toyseg32.png");
+    cv::Mat preprocessed = cv::imread("../Photos/segments/toyseg32.png",CV_LOAD_IMAGE_GRAYSCALE);
+//    cv::Mat preprocessed = preprocessing(color_image);
+    std::vector<EllipseDetection> results;
+    EllipseDetectionParams params;
+    params.minAspectRatio = 0.5f;
+    params.randomize = 2;
+    params.rotation = 90.0f;
+    params.rotationSpan = 10.0f;
+    params.maxMajorAxis = 90.0f;
+    params.minMajorAxis = 20.0f;
+    results = ellipseDetection(preprocessed, params);
+    EllipseDetection bestEllipse = *(results.begin());
+    std::cout << "x: " << bestEllipse.x << " y: " << bestEllipse.y << " majAxis: "
+              << bestEllipse.majorAxis << " minAxis: " << bestEllipse.minorAxis
+              << " angle: " << bestEllipse.angle << " score " << bestEllipse.score << std::endl;
+
+    cv::ellipse(color_image, cv::Point(bestEllipse.y,bestEllipse.x),cv::Size(bestEllipse.minorAxis,bestEllipse.majorAxis),bestEllipse.angle-45.0,0,360,cv::Scalar(0,0,255));
+
+    params.minAspectRatio = 0.2f;
+    params.randomize = 2;
+    params.rotation = 0.0f;
+    params.rotationSpan = 5.0f;
+    params.maxMajorAxis = 60.0f;
+    params.minMajorAxis = 20.0f;
+    results = ellipseDetection(preprocessed, params);
+    bestEllipse = *(results.begin());
+    std::cout << "x: " << bestEllipse.x << " y: " << bestEllipse.y << " majAxis: "
+              << bestEllipse.majorAxis << " minAxis: " << bestEllipse.minorAxis
+              << " angle: " << bestEllipse.angle << " score " << bestEllipse.score << std::endl;
+
+    cv::ellipse(color_image, cv::Point(bestEllipse.y,bestEllipse.x),cv::Size(bestEllipse.minorAxis,bestEllipse.majorAxis),bestEllipse.angle-45.0,0,360,cv::Scalar(255,0,0));
+
+
+    cv::imshow("Detected ellipse", color_image);
+}
+
+TEST_CASE("Detect ellipse in toyota logo with preprocessing"){
+    cv::Mat color_image = cv::imread("../Photos/toy4cropped.jpg");
+//    cv::Mat preprocessed = cv::imread("../Photos/segments/toyseg32.png",CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat preprocessed = preprocessing(color_image);
+    std::vector<EllipseDetection> results;
+    EllipseDetectionParams params;
+    params.minAspectRatio = 0.5f;
+    params.randomize = 2;
+    params.rotation = 90.0f;
+    params.rotationSpan = 10.0f;
+    params.maxMajorAxis = 90.0f;
+    params.minMajorAxis = 20.0f;
+    results = ellipseDetection(preprocessed, params);
+    EllipseDetection bestEllipse = *(results.begin());
+    std::cout << "x: " << bestEllipse.x << " y: " << bestEllipse.y << " majAxis: "
+              << bestEllipse.majorAxis << " minAxis: " << bestEllipse.minorAxis
+              << " angle: " << bestEllipse.angle << " score " << bestEllipse.score << std::endl;
+
+    cv::ellipse(color_image, cv::Point(bestEllipse.y,bestEllipse.x),cv::Size(bestEllipse.minorAxis,bestEllipse.majorAxis),bestEllipse.angle-45.0,0,360,cv::Scalar(0,0,255));
+
+    params.minAspectRatio = 0.2f;
+    params.randomize = 2;
+    params.rotation = 0.0f;
+    params.rotationSpan = 5.0f;
+    params.maxMajorAxis = 60.0f;
+    params.minMajorAxis = 20.0f;
+    results = ellipseDetection(preprocessed, params);
+    bestEllipse = *(results.begin());
+    std::cout << "x: " << bestEllipse.x << " y: " << bestEllipse.y << " majAxis: "
+              << bestEllipse.majorAxis << " minAxis: " << bestEllipse.minorAxis
+              << " angle: " << bestEllipse.angle << " score " << bestEllipse.score << std::endl;
+
+    cv::ellipse(color_image, cv::Point(bestEllipse.y,bestEllipse.x),cv::Size(bestEllipse.minorAxis,bestEllipse.majorAxis),bestEllipse.angle-45.0,0,360,cv::Scalar(255,0,0));
+
+
+    cv::imshow("Detected ellipse 2", color_image);
+    cvWaitKey(-1);
 }
