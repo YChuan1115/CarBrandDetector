@@ -69,6 +69,23 @@ std::vector<PairOfPoints> getPairsWithDistanceInRange(const std::vector<Point> p
     return filteredPairs;
 }
 
+std::vector<PairOfPoints> getRandomSubsetOfPairs(const std::vector<PairOfPoints> &pairs, const unsigned int randomizationFactor , const unsigned int minNumberOfPairs){
+    if( minNumberOfPairs > pairs.size() || randomizationFactor == 0)
+        return pairs;
+    std::srand(unsigned(std::time(0)));
+    std::vector<unsigned int> indexes(pairs.size());
+    for(unsigned int i=0; i<pairs.size(); ++i)
+        indexes.at(i) = i;
+    std::random_shuffle(indexes.begin(),indexes.end());
+    unsigned int numberOfPairs = std::min(static_cast<unsigned int>(pairs.size()), minNumberOfPairs*randomizationFactor);
+    std::vector<PairOfPoints> selectedPairs;
+    for(int i=0; i < numberOfPairs; ++i){
+        selectedPairs.push_back(pairs.at(indexes.at(i)));
+    }
+    return selectedPairs;
+}
+
+
 float calculateDistance( const float x1, const float x2, const float y1, const float y2){
     return static_cast<float>(sqrt(pow(x1- x2, 2.0) + pow(y1 - y2, 2.0)));
 }
@@ -82,5 +99,7 @@ std::vector<EllipseDetection> ellipseDetection(const Mat image, const EllipseDet
     std::vector<Point> nonZeroPoints = getNonZeroPoints(I);
     std::vector<PairOfPoints> filteredPairs = getPairsWithDistanceInRange(nonZeroPoints, params.minMajorAxis, params.maxMajorAxis);
     filteredPairs = getPairsWithAngleInSpan(filteredPairs, params.rotation, params.rotationSpan);
+
+    filteredPairs = getRandomSubsetOfPairs(filteredPairs, params.randomize, static_cast<unsigned int>(nonZeroPoints.size()));
 
 }

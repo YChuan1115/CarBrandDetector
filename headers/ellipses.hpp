@@ -10,6 +10,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <cmath>
+#include <ctime>        // std::time
+#include <cstdlib>      // std::rand, std::srand
+#include <algorithm>
 
 struct EllipseDetection {
     unsigned int x;
@@ -51,7 +54,10 @@ std::vector<PairOfPoints> getPairsWithDistanceInRange(const std::vector<Point> p
 
 std::vector<PairOfPoints> getPairsWithAngleInSpan(const std::vector<PairOfPoints> pairs, const float middleRotationDeg, const float rotationSpanDeg);
 
+std::vector<PairOfPoints> getRandomSubsetOfPairs(const std::vector<PairOfPoints> &pairs, const unsigned int randomizationFactor , const unsigned int minNumberOfPairs);
+
 float degToRad( float degrees);
+
 
 
 #endif //CARBRANDDETECTOR_ELLIPSES_HPP

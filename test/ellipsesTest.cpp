@@ -61,5 +61,26 @@ TEST_CASE("Filter out all pairs with angle in range of 40-90 deegrees") {
     expected.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
 
     REQUIRE( filteringResult == expected );
+}
 
+TEST_CASE("For randomization parameter equal to 0 return all pairs") {
+    std::vector<PairOfPoints> pairs;
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(2,2)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(1,0)));
+    REQUIRE(getRandomSubsetOfPairs(pairs, 0, 2).size() == pairs.size());
+}
+
+TEST_CASE("Return random subset, but not smaller than minimal number of pairs argument") {
+    std::vector<PairOfPoints> pairs;
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(2,2)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(1,0)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(2,2)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(1,0)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(2,2)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
+    pairs.emplace_back(std::make_pair(Point(0,0),Point(1,0)));
+    REQUIRE(getRandomSubsetOfPairs(pairs, 2, 2).size() <= 2*2);
 }
