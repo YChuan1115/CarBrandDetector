@@ -152,6 +152,9 @@ std::vector<EllipseDetection> ellipseDetection(const Mat image, const EllipseDet
     std::cout << "After angle constraint: " << filteredPairs.size()<< std::endl;
 
 
+
+
+
     for( auto && pair : filteredPairs){
         Point center = calculateEllipseCenter(pair);
         float majorAxis = calculateDistance(pair)/2;
@@ -190,7 +193,7 @@ std::vector<EllipseDetection> ellipseDetection(const Mat image, const EllipseDet
     return results;
 }
 
-std::pair<bool, Point> find2Ellipses(const Mat image){
+std::pair<bool, Point> find2Ellipses(Mat & image){
 
     std::vector<EllipseDetection> resultsHorizontal, resultsVertical;
     EllipseDetectionParams params;
@@ -206,7 +209,7 @@ std::pair<bool, Point> find2Ellipses(const Mat image){
               << bestHorizontalEllipse.majorAxis << " minAxis: " << bestHorizontalEllipse.minorAxis
               << " angle: " << bestHorizontalEllipse.angle << " score " << bestHorizontalEllipse.score << std::endl;
 
-  //  cv::ellipse(image, cv::Point(bestEllipse.y,bestEllipse.x),cv::Size(bestEllipse.minorAxis,bestEllipse.majorAxis),bestEllipse.angle-45.0,0,360,cv::Scalar(0,0,255));
+    cv::ellipse(image, cv::Point(bestHorizontalEllipse.y,bestHorizontalEllipse.x),cv::Size(bestHorizontalEllipse.minorAxis,bestHorizontalEllipse.majorAxis),bestHorizontalEllipse.angle-45.0,0,360,cv::Scalar(0,0,255));
 
     params.minAspectRatio = 0.2f;
     params.rotation = 0.0f;
@@ -220,7 +223,7 @@ std::pair<bool, Point> find2Ellipses(const Mat image){
               << " angle: " << bestVerticalEllipse.angle << " score " << bestVerticalEllipse.score << std::endl;
 
     float ellipsesDist = calculateDistance(bestHorizontalEllipse.x, bestVerticalEllipse.x, bestHorizontalEllipse.y, bestVerticalEllipse.y);
-    //  cv::ellipse(color_image, cv::Point(bestEllipse.y,bestEllipse.x),cv::Size(bestEllipse.minorAxis,bestEllipse.majorAxis),bestEllipse.angle-45.0,0,360,cv::Scalar(255,0,0));
+    cv::ellipse(image, cv::Point(bestVerticalEllipse.y,bestVerticalEllipse.x),cv::Size(bestVerticalEllipse.minorAxis,bestVerticalEllipse.majorAxis),bestVerticalEllipse.angle-45.0,0,360,cv::Scalar(255,0,0));
 
     std::pair<bool, Point> result(false, Point(0,0));
     if(bestHorizontalEllipse.score > 30.0f && bestVerticalEllipse.score > 30.0f && ellipsesDist < 15.0f && bestHorizontalEllipse.majorAxis > bestVerticalEllipse.majorAxis*1.3f) {

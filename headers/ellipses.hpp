@@ -42,7 +42,7 @@ struct Point {
 
 typedef std::pair<Point,Point> PairOfPoints;
 
-std::pair<bool, Point> find2Ellipses(const cv::Mat image);
+std::pair<bool, Point> find2Ellipses(cv::Mat &image);
 
 std::vector<EllipseDetection> ellipseDetection(const cv::Mat image, const EllipseDetectionParams params);
 
