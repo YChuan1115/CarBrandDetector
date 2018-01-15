@@ -39,9 +39,9 @@ std::vector<AxisCandidate> getPairsWithAngleInSpan(const std::vector<AxisCandida
 
     float tanLow = tan(degToRad(middleRotationDeg-rotationSpanDeg));
     float tanHigh = tan(degToRad(middleRotationDeg+rotationSpanDeg));
-    std::cout << "Deg: " << middleRotationDeg-rotationSpanDeg << " " << middleRotationDeg+rotationSpanDeg << std::endl;
-    std::cout << "DegtoRad: " << degToRad(middleRotationDeg-rotationSpanDeg) << " " << degToRad(middleRotationDeg+rotationSpanDeg) << std::endl;
-    std::cout << tanLow << " " << tanHigh << std::endl;
+  //  std::cout << "Deg: " << middleRotationDeg-rotationSpanDeg << " " << middleRotationDeg+rotationSpanDeg << std::endl;
+  //  std::cout << "DegtoRad: " << degToRad(middleRotationDeg-rotationSpanDeg) << " " << degToRad(middleRotationDeg+rotationSpanDeg) << std::endl;
+  //  std::cout << tanLow << " " << tanHigh << std::endl;
 
     for(auto && axisCandidate : axisCandidates){
         Point point1 = axisCandidate.point1;
@@ -142,17 +142,16 @@ std::vector<EllipseDetection> ellipseDetection(const Mat image, const EllipseDet
     Mat I = Mat(image);
     //cv::imshow("Detected ellipse", I);
     std::vector<Point> nonZeroPoints = getNonZeroPoints(I);
-    std::cout << "Possible major axes: " << nonZeroPoints.size()<<"x"<<nonZeroPoints.size()<<" "<< nonZeroPoints.size()*nonZeroPoints.size() << std::endl;
-
+   // std::cout << "Possible major axes: " << nonZeroPoints.size()<<"x"<<nonZeroPoints.size()<<" "<< nonZeroPoints.size()*nonZeroPoints.size() << std::endl;
     std::vector<AxisCandidate> filteredAxisCandidates = getPairsWithDistanceInRange(nonZeroPoints, params.minMajorAxis*2, params.maxMajorAxis*2);
-    std::cout << "After distance constraint: " << filteredAxisCandidates.size()<< std::endl;
+//    std::cout << "After distance constraint: " << filteredAxisCandidates.size()<< std::endl;
 
 
     filteredAxisCandidates = getPairsWithAngleInSpan(filteredAxisCandidates, params.rotation, params.rotationSpan);
-    std::cout << "After angle constraint: " << filteredAxisCandidates.size()<< std::endl;
+   // std::cout << "After angle constraint: " << filteredAxisCandidates.size()<< std::endl;
 
     filteredAxisCandidates = getRandomSubsetOfPairs(filteredAxisCandidates, params.randomize, static_cast<unsigned int>(nonZeroPoints.size()));
-    std::cout << "After randomization: " << filteredAxisCandidates.size()<< std::endl;
+  //  std::cout << "After randomization: " << filteredAxisCandidates.size()<< std::endl;
 
 
 
@@ -174,9 +173,21 @@ std::vector<EllipseDetection> ellipseDetection(const Mat image, const EllipseDet
             accumulator.at(static_cast<unsigned long>(floor(minAxis))) += 1;
         }
         // Discard ellipses with wrong aspect ratio
-        for(auto it = accumulator.begin(); it != accumulator.begin()+ static_cast<unsigned long>((axisCandidate.distance/2.0f)*params.minAspectRatio); ++it){
-            (*it) = 0;
+        auto minMinorAxisLengthFromMinAspectRatio = static_cast<unsigned long>((axisCandidate.distance/2.0f)*params.minAspectRatio);
+        if(minMinorAxisLengthFromMinAspectRatio < accumulator.size()){
+            for(auto it = accumulator.begin(); it != accumulator.begin()+ minMinorAxisLengthFromMinAspectRatio ; ++it){
+                (*it) = 0;
+            }
         }
+
+        auto maxMinorAxisLengthFromMaxAspectRatio = static_cast<unsigned long>(floor((axisCandidate.distance/2.0f)*params.maxAspectRatio));
+        if(maxMinorAxisLengthFromMaxAspectRatio < accumulator.size()){
+            for(auto it = accumulator.begin()+maxMinorAxisLengthFromMaxAspectRatio; it != accumulator.end() ; ++it){
+                (*it) = 0;
+            }
+        }
+
+
         auto bestElem = std::max_element(accumulator.begin(),accumulator.end());
         unsigned long score = *bestElem;
         if(score > result.score){
@@ -198,10 +209,11 @@ std::pair<bool, Point> find2Ellipses(Mat & image, Mat & color_image){
     std::vector<EllipseDetection> resultsHorizontal, resultsVertical;
     EllipseDetectionParams params;
     params.minAspectRatio = 0.4f;
+    params.maxAspectRatio = 0.72f;
     params.randomize = 1;
     params.rotation = 90.0f;
     params.rotationSpan = 20.0f;
-    params.maxMajorAxis = 40.0f;
+    params.maxMajorAxis = 50.0f;
     params.minMajorAxis = 10.0f;
     resultsHorizontal = ellipseDetection(image, params);
     EllipseDetection bestHorizontalEllipse = *(resultsHorizontal.begin());
@@ -209,6 +221,7 @@ std::pair<bool, Point> find2Ellipses(Mat & image, Mat & color_image){
    //  cv::ellipse(color_image, cv::Point(bestHorizontalEllipse.y,bestHorizontalEllipse.x),cv::Size(bestHorizontalEllipse.minorAxis,bestHorizontalEllipse.majorAxis),bestHorizontalEllipse.angle-45.0,0,360,cv::Scalar(0,0,255));
 
     params.minAspectRatio = 0.2f;
+    params.maxAspectRatio = 0.4f;
     params.rotation = bestHorizontalEllipse.angle + 90.0f;
     params.rotationSpan = 10.0f;
     params.maxMajorAxis = bestHorizontalEllipse.majorAxis*0.7f;

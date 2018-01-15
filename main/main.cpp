@@ -156,7 +156,7 @@ void preprocessAndSaveScanArea(){
 }
 
 void mainImageSearch(){
-    cv::Mat originalImage = cv::imread("../Photos/toyota6.jpg");
+    cv::Mat originalImage = cv::imread("../Photos/toyota1.jpg");
 
    // shapeMomentsAnalysis();
 

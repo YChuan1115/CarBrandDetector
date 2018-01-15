@@ -29,6 +29,7 @@ struct EllipseDetectionParams {
     float rotation;
     float rotationSpan;
     float minAspectRatio;
+    float maxAspectRatio;
     unsigned int randomize;
 };
 
