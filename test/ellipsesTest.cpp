@@ -163,17 +163,37 @@ TEST_CASE("Detect ellipse in toyota logo with preprocessing"){
     cv::imshow("Detected ellipse 2", color_image);
     cvWaitKey(-1);
 }*/
+/*
 TEST_CASE("Detect ellipse in toyota logo with preprocessing") {
-    cv::Mat color_image = cv::imread("../Photos/toy4cropped.jpg");
-    cv::Mat preprocessed = preprocessing(color_image);
 
-    std::pair<bool, Point> logo = find2Ellipses(preprocessed);
+    cv::Mat color_image = cv::imread("../Photos/simpletoy.jpg");
+    cv::Mat bw_image = cv::imread("../Photos/simpletoy.jpg", CV_8UC1);
+  //  cv::Mat preprocessed = preprocessing(color_image);
 
-    cv::Rect border(cv::Point(logo.second.y,logo.second.x), cv::Size(10,10));
+    std::vector<EllipseDetection> resultsHorizontal, resultsVertical;
+    EllipseDetectionParams params;
+    params.minAspectRatio = 0.1f;
+    params.randomize = 1;
+    params.rotation = 0.0f;
+    params.rotationSpan = 5.0f;
+    params.maxMajorAxis = 200.0f;
+    params.minMajorAxis = 1.0f;
+    resultsHorizontal = ellipseDetection(bw_image, params);
+    EllipseDetection bestHorizontalEllipse = *(resultsHorizontal.begin());
+    std::cout << "x: " << bestHorizontalEllipse.x << " y: " << bestHorizontalEllipse.y << " majAxis: "
+              << bestHorizontalEllipse.majorAxis << " minAxis: " << bestHorizontalEllipse.minorAxis
+              << " angle: " << bestHorizontalEllipse.angle << " score " << bestHorizontalEllipse.score << std::endl;
+
+    cv::ellipse(color_image, cv::Point(bestHorizontalEllipse.x,bestHorizontalEllipse.y),cv::Size(bestHorizontalEllipse.minorAxis,bestHorizontalEllipse.majorAxis),bestHorizontalEllipse.angle,0,360,cv::Scalar(0,0,255));
+
+
+    cv::Rect border(cv::Point(bestHorizontalEllipse.x,bestHorizontalEllipse.y), cv::Size(5,5));
     cv::Scalar color(0,0,255);
     int thickness = 1;
     cv::rectangle(color_image, border, color, 5);
+
+   // cv::ellipse(color_image, cv::Point(38,58),cv::Size(24,28),180,0,360,cv::Scalar(0,255,0));
     cv::imshow("Detected ellipse", color_image);
-    cv::imshow("Preprocessed", preprocessed);
+   // cv::imshow("bw", bw_image);
     cvWaitKey(-1);
-}
+}*/

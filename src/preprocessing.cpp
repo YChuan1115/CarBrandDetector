@@ -14,18 +14,18 @@ cv::Mat preprocessing(cv::Mat image){
     cv::Mat sobelY = convolutionSingleChannel<int,3>(blurred, sobely);
     cv::Mat magn = magnitude(sobelX,sobelY);
     cv::Mat binary;
-    threshold(magn, binary, 127,255, THRESH_BINARY);
+    threshold(magn, binary, 120,255, THRESH_BINARY);
     int dilation_type = MORPH_RECT;
-    int dilation_size = 1;
+    int dilation_size = 2;
     Mat element = getStructuringElement( dilation_type,
                                          Size( 2*dilation_size + 1, 2*dilation_size+1 ),
                                          Point( dilation_size, dilation_size ) );
     /// Apply the dilation operation
-    //   dilate( binary, binary, element );
+//       dilate( binary, binary, element );
     //   dilate( binary, binary, element );
     //  dilate( binary, binary, element );
     //   imshow("afterDilation",binary);
-    //  erode(binary,binary,element);
+//      erode(binary,binary,element);
     //   imshow("afterClosing",binary);
 //      imshow("leveled", leveled);
     // morphologyEx(binary, binary, MORPH_CLOSE);

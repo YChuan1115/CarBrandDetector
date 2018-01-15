@@ -49,7 +49,7 @@ struct AxisCandidate {
 };
 
 
-std::pair<bool, Point> find2Ellipses(cv::Mat &image);
+std::pair<bool, Point> find2Ellipses(cv::Mat & image, cv::Mat & color_image);
 
 std::vector<EllipseDetection> ellipseDetection(const cv::Mat image, const EllipseDetectionParams params);
 

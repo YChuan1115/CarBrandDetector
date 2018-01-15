@@ -112,11 +112,11 @@ cv::Mat naiveScan(cv::Mat image , cv::Mat original_image){
     int imageHeight = image.rows;
     int imageWidth = image.cols;
     int scanHeight = 80;
-    int scanWidth = 90;
+    int scanWidth = 150;
     int scanOffsetX = scanWidth/2;
     int scanOffsetY = scanHeight/2;
-    int stepX = 20;
-    int stepY = 20;
+    int stepX = 50;
+    int stepY = 30;
     int scanPosX = 0;
     int scanPosY = 0;
     cv::Rect scanRect = cv::Rect(scanPosX,scanPosY, scanWidth, scanHeight);
@@ -128,12 +128,13 @@ cv::Mat naiveScan(cv::Mat image , cv::Mat original_image){
     while(scanPosY < imageHeight-scanHeight-1){
         cv::Mat scanArea = image(scanRect);
 //        Mat scanArea = image;
-        std::pair<bool, Point> result = find2Ellipses(scanArea);
+        std::pair<bool, Point> result = find2Ellipses(scanArea, scanArea);
         if(result.first){
-            cv::Rect border(cv::Point(scanPosX+result.second.x,scanPosY+result.second.y), cv::Size(10,10));
+            //std::cout << "Found logo: x: " << scanPosX+result.second.x << " y:" << scanPosY+result.second.y << std::endl;
+            cv::Point location = cv::Point(scanRect.x + result.second.x, scanRect.y+result.second.y);
             cv::Scalar color(0,0,255);
             int thickness = 1;
-            cv::rectangle(original_image, border, color, 5);
+            cv::circle(original_image, location, 4, color,2);
             std::cout << "Found logo at x: " << scanPosX << " y: " << scanPosY << std::endl;
         }
 
@@ -155,7 +156,7 @@ void preprocessAndSaveScanArea(){
 }
 
 void mainImageSearch(){
-    cv::Mat originalImage = cv::imread("../Photos/toy1cropped.jpg");
+    cv::Mat originalImage = cv::imread("../Photos/toyota6.jpg");
 
    // shapeMomentsAnalysis();
 
