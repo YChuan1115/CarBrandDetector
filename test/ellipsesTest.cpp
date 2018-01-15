@@ -37,7 +37,7 @@ TEST_CASE( "Calculate pairwise distances between 3 points (including distances w
     REQUIRE( computePairwiseDistances(points).size() == 6);
 }
 
-TEST_CASE( "Calculate pairwise distances between 3 points (including distances with themselves) and get only those with range between 1.0 and 2.0") {
+/*TEST_CASE( "Calculate pairwise distances between 3 points (including distances with themselves) and get only those with range between 1.0 and 2.0") {
     std::vector<Point> points;
     points.emplace_back(Point(0,0));
     points.emplace_back(Point(2,0));
@@ -62,9 +62,9 @@ TEST_CASE("Filter out all pairs with angle in range of 40-90 deegrees") {
     expected.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
 
     REQUIRE( filteringResult == expected );
-}
+}*/
 
-TEST_CASE("For randomization parameter equal to 0 return all pairs") {
+/*TEST_CASE("For randomization parameter equal to 0 return all pairs") {
     std::vector<PairOfPoints> pairs;
     pairs.emplace_back(std::make_pair(Point(0,0),Point(2,2)));
     pairs.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
@@ -84,9 +84,9 @@ TEST_CASE("Return random subset, but not smaller than minimal number of pairs ar
     pairs.emplace_back(std::make_pair(Point(0,0),Point(0,2)));
     pairs.emplace_back(std::make_pair(Point(0,0),Point(1,0)));
     REQUIRE(getRandomSubsetOfPairs(pairs, 2, 2).size() <= 2*2);
-}
+}*/
 
-TEST_CASE("Detect ellipse in toyota logo"){
+/*TEST_CASE("Detect ellipse in toyota logo"){
     cv::Mat color_image = cv::imread("../Photos/segments/toyseg32.png");
     cv::Mat preprocessed = cv::imread("../Photos/segments/toyseg32.png",CV_LOAD_IMAGE_GRAYSCALE);
 //    cv::Mat preprocessed = preprocessing(color_image);
@@ -122,7 +122,8 @@ TEST_CASE("Detect ellipse in toyota logo"){
 
 
     cv::imshow("Detected ellipse", color_image);
-}
+}*/
+/*
 
 TEST_CASE("Detect ellipse in toyota logo with preprocessing"){
     cv::Mat color_image = cv::imread("../Photos/toy4cropped.jpg");
@@ -160,5 +161,19 @@ TEST_CASE("Detect ellipse in toyota logo with preprocessing"){
 
 
     cv::imshow("Detected ellipse 2", color_image);
+    cvWaitKey(-1);
+}*/
+TEST_CASE("Detect ellipse in toyota logo with preprocessing") {
+    cv::Mat color_image = cv::imread("../Photos/toy4cropped.jpg");
+    cv::Mat preprocessed = preprocessing(color_image);
+
+    std::pair<bool, Point> logo = find2Ellipses(preprocessed);
+
+    cv::Rect border(cv::Point(logo.second.y,logo.second.x), cv::Size(10,10));
+    cv::Scalar color(0,0,255);
+    int thickness = 1;
+    cv::rectangle(color_image, border, color, 5);
+    cv::imshow("Detected ellipse", color_image);
+    cv::imshow("Preprocessed", preprocessed);
     cvWaitKey(-1);
 }

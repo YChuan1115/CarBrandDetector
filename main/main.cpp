@@ -111,12 +111,12 @@ bool findLogo(cv::Mat area){
 cv::Mat naiveScan(cv::Mat image , cv::Mat original_image){
     int imageHeight = image.rows;
     int imageWidth = image.cols;
-    int scanHeight = 100;
-    int scanWidth = 200;
+    int scanHeight = 80;
+    int scanWidth = 90;
     int scanOffsetX = scanWidth/2;
     int scanOffsetY = scanHeight/2;
-    int stepX = 40;
-    int stepY = 90;
+    int stepX = 20;
+    int stepY = 20;
     int scanPosX = 0;
     int scanPosY = 0;
     cv::Rect scanRect = cv::Rect(scanPosX,scanPosY, scanWidth, scanHeight);
@@ -155,7 +155,7 @@ void preprocessAndSaveScanArea(){
 }
 
 void mainImageSearch(){
-    cv::Mat originalImage = cv::imread("../Photos/toyota2.jpg");
+    cv::Mat originalImage = cv::imread("../Photos/toy1cropped.jpg");
 
    // shapeMomentsAnalysis();
 

@@ -6,6 +6,7 @@
 #define CARBRANDDETECTOR_ELLIPSES_HPP
 
 #include <vector>
+#include <tuple>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -40,7 +41,13 @@ struct Point {
     }
 };
 
-typedef std::pair<Point,Point> PairOfPoints;
+struct AxisCandidate {
+    Point point1;
+    Point point2;
+    float distance;
+    AxisCandidate(Point point1, Point point2, float dist): point1(point1), point2(point2), distance(dist){};
+};
+
 
 std::pair<bool, Point> find2Ellipses(cv::Mat &image);
 
@@ -52,11 +59,11 @@ std::vector<float> computePairwiseDistances(const std::vector<Point> points);
 
 float calculateDistance( const float x1, const float x2, const float y1, const float y2);
 
-std::vector<PairOfPoints> getPairsWithDistanceInRange(const std::vector<Point> points, const float minDistance, const float maxDistance);
+std::vector<AxisCandidate> getPairsWithDistanceInRange(const std::vector<Point> &points, const float minDistance, const float maxDistance);
 
-std::vector<PairOfPoints> getPairsWithAngleInSpan(const std::vector<PairOfPoints> pairs, const float middleRotationDeg, const float rotationSpanDeg);
+std::vector<AxisCandidate> getPairsWithAngleInSpan(const std::vector<AxisCandidate> &axisCandidates, const float middleRotationDeg, const float rotationSpanDeg);
 
-std::vector<PairOfPoints> getRandomSubsetOfPairs(const std::vector<PairOfPoints> &pairs, const unsigned int randomizationFactor , const unsigned int minNumberOfPairs);
+std::vector<AxisCandidate> getRandomSubsetOfPairs(const std::vector<AxisCandidate> &axisCandidates, const unsigned int randomizationFactor , const unsigned int minNumberOfPairs);
 
 float degToRad( float degrees);
 

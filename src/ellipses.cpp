@@ -32,8 +32,8 @@ std::vector<float> computePairwiseDistances(const std::vector<Point> points){
     return distances;
 }
 
-std::vector<PairOfPoints> getPairsWithAngleInSpan(const std::vector<PairOfPoints> pairs, const float middleRotationDeg, const float rotationSpanDeg){
-    std::vector<PairOfPoints> filteredPairs;
+std::vector<AxisCandidate> getPairsWithAngleInSpan(const std::vector<AxisCandidate> &axisCandidates, const float middleRotationDeg, const float rotationSpanDeg){
+    std::vector<AxisCandidate> filteredAxisCandidates;
 
     float tanLow = tan(degToRad(middleRotationDeg-rotationSpanDeg));
     float tanHigh = tan(degToRad(middleRotationDeg+rotationSpanDeg));
@@ -41,40 +41,40 @@ std::vector<PairOfPoints> getPairsWithAngleInSpan(const std::vector<PairOfPoints
     std::cout << "DegtoRad: " << degToRad(middleRotationDeg-rotationSpanDeg) << " " << degToRad(middleRotationDeg+rotationSpanDeg) << std::endl;
     std::cout << tanLow << " " << tanHigh << std::endl;
 
-    for(auto && pair : pairs){
-        Point point1 = pair.first;
-        Point point2 = pair.second;
+    for(auto && axisCandidate : axisCandidates){
+        Point point1 = axisCandidate.point1;
+        Point point2 = axisCandidate.point2;
         float tangent = (static_cast<float>(point1.y-point2.y))/(static_cast<float>(point1.x-point2.x));
 //        std::cout << "Tangent: " << tangent << std::endl;
         if( tanLow < tanHigh){
             if(tangent > tanLow && tangent < tanHigh)
-                filteredPairs.push_back(pair);
+                filteredAxisCandidates.push_back(axisCandidate);
         }else{
             if(tangent > tanLow || tangent < tanHigh)
-                filteredPairs.push_back(pair);
+                filteredAxisCandidates.push_back(axisCandidate);
         }
     }
 
-    return filteredPairs;
+    return filteredAxisCandidates;
 
 }
 
-std::vector<PairOfPoints> getPairsWithDistanceInRange(const std::vector<Point> points, const float minDistance, const float maxDistance){
-    std::vector<PairOfPoints> filteredPairs;
+std::vector<AxisCandidate> getPairsWithDistanceInRange(const std::vector<Point> &points, const float minDistance, const float maxDistance){
+    std::vector<AxisCandidate> filteredPairsWithDistance;
     for(int i=0; i<points.size(); ++i){
         for( int j=i; j<points.size(); ++j){
             Point point1 = points.at(i);
             Point point2 = points.at(j);
             float distance = calculateDistance(point1.x, point2.x, point1.y, point2.y);
             if(distance >= minDistance && distance <= maxDistance){
-                filteredPairs.emplace_back(std::make_pair(point1,point2));
+                filteredPairsWithDistance.emplace_back(AxisCandidate(point1,point2, distance));
             }
         }
     }
-    return filteredPairs;
+    return filteredPairsWithDistance;
 }
 
-std::vector<Point> getPointsWithDistanceSmallerThan(const Point origin, const std::vector<Point> points, const float maxDistance){
+std::vector<Point> getPointsWithDistanceSmallerThan(const Point origin, const std::vector<Point> &points, const float maxDistance){
     std::vector<Point> filteredPoints;
     for(auto point : points){
         float distance = calculateDistance(point.x, origin.x, point.y, origin.y);
@@ -85,18 +85,18 @@ std::vector<Point> getPointsWithDistanceSmallerThan(const Point origin, const st
     return filteredPoints;
 }
 
-std::vector<PairOfPoints> getRandomSubsetOfPairs(const std::vector<PairOfPoints> &pairs, const unsigned int randomizationFactor , const unsigned int minNumberOfPairs){
-    if( minNumberOfPairs > pairs.size() || randomizationFactor == 0)
-        return pairs;
+std::vector<AxisCandidate> getRandomSubsetOfPairs(const std::vector<AxisCandidate> &axisCandidates, const unsigned int randomizationFactor , const unsigned int minNumberOfPairs){
+    if( minNumberOfPairs > axisCandidates.size() || randomizationFactor == 0)
+        return axisCandidates;
     std::srand(unsigned(std::time(0)));
-    std::vector<unsigned int> indexes(pairs.size());
-    for(unsigned int i=0; i<pairs.size(); ++i)
+    std::vector<unsigned int> indexes(axisCandidates.size());
+    for(unsigned int i=0; i<axisCandidates.size(); ++i)
         indexes.at(i) = i;
     std::random_shuffle(indexes.begin(),indexes.end());
-    unsigned int numberOfPairs = std::min(static_cast<unsigned int>(pairs.size()), minNumberOfPairs*randomizationFactor);
-    std::vector<PairOfPoints> selectedPairs;
+    unsigned int numberOfPairs = std::min(static_cast<unsigned int>(axisCandidates.size()), minNumberOfPairs*randomizationFactor);
+    std::vector<AxisCandidate> selectedPairs;
     for(int i=0; i < numberOfPairs; ++i){
-        selectedPairs.push_back(pairs.at(indexes.at(i)));
+        selectedPairs.push_back(axisCandidates.at(indexes.at(i)));
     }
     return selectedPairs;
 }
@@ -106,17 +106,17 @@ float calculateDistance( const float x1, const float x2, const float y1, const f
     return static_cast<float>(sqrt(pow(x1- x2, 2.0) + pow(y1 - y2, 2.0)));
 }
 
-float calculateDistance( const PairOfPoints pair){
-    return static_cast<float>(sqrt(pow(pair.first.x- pair.second.x, 2.0) + pow(pair.first.y - pair.second.y, 2.0)));
-}
+//float calculateDistance( const PairOfPoints pair){
+//    return static_cast<float>(sqrt(pow(pair.first.x- pair.second.x, 2.0) + pow(pair.first.y - pair.second.y, 2.0)));
+//}
 
 float calculateDistanceSquared( const float x1, const float x2, const float y1, const float y2){
     return static_cast<float>((pow(x1- x2, 2.0) + pow(y1 - y2, 2.0)));
 }
 
-float calculateDistanceSquared( const PairOfPoints pair){
-    return static_cast<float>((pow(pair.first.x- pair.second.x, 2.0) + pow(pair.first.y - pair.second.y, 2.0)));
-}
+//float calculateDistanceSquared( const PairOfPoints pair){
+//    return static_cast<float>((pow(pair.first.x- pair.second.x, 2.0) + pow(pair.first.y - pair.second.y, 2.0)));
+//}
 
 float degToRad( float degrees){
     return static_cast<float>(degrees* static_cast<float>(M_PI)/180.0f);
@@ -126,9 +126,9 @@ float radToDeg( float radians){
     return static_cast<float>(radians*180.0f/static_cast<float>(M_PI));
 }
 
-inline Point calculateEllipseCenter(PairOfPoints majorAxisVertices){
-    long centerX = (majorAxisVertices.first.x + majorAxisVertices.second.x)/2;
-    long centerY = (majorAxisVertices.first.y + majorAxisVertices.second.y)/2;
+inline Point calculateEllipseCenter(AxisCandidate majorAxisVertices){
+    long centerX = (majorAxisVertices.point1.x + majorAxisVertices.point2.x)/2;
+    long centerY = (majorAxisVertices.point1.y + majorAxisVertices.point2.y)/2;
     return {centerX,centerY};
 }
 
@@ -142,31 +142,29 @@ std::vector<EllipseDetection> ellipseDetection(const Mat image, const EllipseDet
     std::vector<Point> nonZeroPoints = getNonZeroPoints(I);
     std::cout << "Possible major axes: " << nonZeroPoints.size()<<"x"<<nonZeroPoints.size()<<" "<< nonZeroPoints.size()*nonZeroPoints.size() << std::endl;
 
-    std::vector<PairOfPoints> filteredPairs = getPairsWithDistanceInRange(nonZeroPoints, params.minMajorAxis, params.maxMajorAxis);
-    std::cout << "After distance constraint: " << filteredPairs.size()<< std::endl;
+    std::vector<AxisCandidate> filteredAxisCandidates = getPairsWithDistanceInRange(nonZeroPoints, params.minMajorAxis, params.maxMajorAxis);
+    std::cout << "After distance constraint: " << filteredAxisCandidates.size()<< std::endl;
 
-    filteredPairs = getRandomSubsetOfPairs(filteredPairs, params.randomize, static_cast<unsigned int>(nonZeroPoints.size()));
-    std::cout << "After randomization: " << filteredPairs.size()<< std::endl;
+    filteredAxisCandidates = getRandomSubsetOfPairs(filteredAxisCandidates, params.randomize, static_cast<unsigned int>(nonZeroPoints.size()));
+    std::cout << "After randomization: " << filteredAxisCandidates.size()<< std::endl;
 
-    filteredPairs = getPairsWithAngleInSpan(filteredPairs, params.rotation, params.rotationSpan);
-    std::cout << "After angle constraint: " << filteredPairs.size()<< std::endl;
-
-
+    filteredAxisCandidates = getPairsWithAngleInSpan(filteredAxisCandidates, params.rotation, params.rotationSpan);
+    std::cout << "After angle constraint: " << filteredAxisCandidates.size()<< std::endl;
 
 
 
-    for( auto && pair : filteredPairs){
-        Point center = calculateEllipseCenter(pair);
-        float majorAxis = calculateDistance(pair)/2;
-        std::vector<Point> thirdPointCandidates = getPointsWithDistanceSmallerThan(center, nonZeroPoints, majorAxis);
-        float majAxisSquared = calculateDistanceSquared(pair)/4;
-        std::vector<unsigned long> accumulator(static_cast<unsigned long>(ceil(majorAxis)),0);
 
+
+    for( auto && axisCandidate : filteredAxisCandidates){
+        Point center = calculateEllipseCenter(axisCandidate);
+        std::vector<Point> thirdPointCandidates = getPointsWithDistanceSmallerThan(center, nonZeroPoints, axisCandidate.distance);
+        std::vector<unsigned long> accumulator(static_cast<unsigned long>(ceil(axisCandidate.distance)),0);
+        float majAxisSquared = static_cast<float>(pow(axisCandidate.distance,2.0));
         // Calculate minor axes for all candidates
         for(Point point : thirdPointCandidates){
             float thirdPointDistSq = calculateDistanceSquared(point.x,center.x, point.y, center.y);
-            float fSq = calculateDistanceSquared(point.x, pair.second.x, point.y, pair.second.y);
-            float cosTau = (majAxisSquared + thirdPointDistSq - fSq)/(2.0f*sqrtf(majAxisSquared*thirdPointDistSq));
+            float fSq = calculateDistanceSquared(point.x, axisCandidate.point2.x, point.y, axisCandidate.point2.y);
+            float cosTau = (majAxisSquared + thirdPointDistSq - fSq)/(2.0f*sqrtf(thirdPointDistSq)*axisCandidate.distance);
             cosTau = std::min(1.0f,std::max(-1.0f,cosTau));
             float sinTauSq = 1.0f - static_cast<float>(pow(cosTau, 2.0));
             float minAxis = sqrt((majAxisSquared*thirdPointDistSq*sinTauSq)/
@@ -174,7 +172,7 @@ std::vector<EllipseDetection> ellipseDetection(const Mat image, const EllipseDet
             accumulator.at(static_cast<unsigned long>(floor(minAxis))) += 1;
         }
         // Discard ellipses with wrong aspect ratio
-        for(auto it = accumulator.begin(); it != accumulator.begin()+ static_cast<unsigned long>(majorAxis*params.minAspectRatio); ++it){
+        for(auto it = accumulator.begin(); it != accumulator.begin()+ static_cast<unsigned long>(axisCandidate.distance*params.minAspectRatio); ++it){
             (*it) = 0;
         }
         auto bestElem = std::max_element(accumulator.begin(),accumulator.end());
@@ -183,9 +181,9 @@ std::vector<EllipseDetection> ellipseDetection(const Mat image, const EllipseDet
             result.score  = score;
             result.x = static_cast<unsigned long>(center.x);
             result.y = static_cast<unsigned long>(center.y);
-            result.majorAxis = majorAxis;
+            result.majorAxis = axisCandidate.distance;
             result.minorAxis = bestElem - accumulator.begin();
-            result.angle = radToDeg(static_cast<float>(atan2(pair.first.y-pair.second.y, pair.first.x-pair.first.y)));
+            result.angle = radToDeg(static_cast<float>(atan2(axisCandidate.point1.y-axisCandidate.point2.y, axisCandidate.point1.x-axisCandidate.point2.x)));
         }
     }
 
@@ -201,7 +199,7 @@ std::pair<bool, Point> find2Ellipses(Mat & image){
     params.randomize = 6;
     params.rotation = 90.0f;
     params.rotationSpan = 10.0f;
-    params.maxMajorAxis = 120.0f;
+    params.maxMajorAxis = 70.0f;
     params.minMajorAxis = 20.0f;
     resultsHorizontal = ellipseDetection(image, params);
     EllipseDetection bestHorizontalEllipse = *(resultsHorizontal.begin());
@@ -209,12 +207,12 @@ std::pair<bool, Point> find2Ellipses(Mat & image){
               << bestHorizontalEllipse.majorAxis << " minAxis: " << bestHorizontalEllipse.minorAxis
               << " angle: " << bestHorizontalEllipse.angle << " score " << bestHorizontalEllipse.score << std::endl;
 
-    cv::ellipse(image, cv::Point(bestHorizontalEllipse.y,bestHorizontalEllipse.x),cv::Size(bestHorizontalEllipse.minorAxis,bestHorizontalEllipse.majorAxis),bestHorizontalEllipse.angle-45.0,0,360,cv::Scalar(0,0,255));
+  cv::ellipse(image, cv::Point(bestHorizontalEllipse.y,bestHorizontalEllipse.x),cv::Size(bestHorizontalEllipse.minorAxis,bestHorizontalEllipse.majorAxis),bestHorizontalEllipse.angle-45.0,0,360,cv::Scalar(255,255,255));
 
     params.minAspectRatio = 0.2f;
     params.rotation = 0.0f;
     params.rotationSpan = 10.0f;
-    params.maxMajorAxis = 80.0f;
+    params.maxMajorAxis = 60.0f;
     params.minMajorAxis = 10.0f;
     resultsVertical = ellipseDetection(image, params);
     EllipseDetection bestVerticalEllipse = *(resultsVertical.begin());
@@ -223,12 +221,12 @@ std::pair<bool, Point> find2Ellipses(Mat & image){
               << " angle: " << bestVerticalEllipse.angle << " score " << bestVerticalEllipse.score << std::endl;
 
     float ellipsesDist = calculateDistance(bestHorizontalEllipse.x, bestVerticalEllipse.x, bestHorizontalEllipse.y, bestVerticalEllipse.y);
-    cv::ellipse(image, cv::Point(bestVerticalEllipse.y,bestVerticalEllipse.x),cv::Size(bestVerticalEllipse.minorAxis,bestVerticalEllipse.majorAxis),bestVerticalEllipse.angle-45.0,0,360,cv::Scalar(255,0,0));
+    cv::ellipse(image, cv::Point(bestVerticalEllipse.y,bestVerticalEllipse.x),cv::Size(bestVerticalEllipse.minorAxis,bestVerticalEllipse.majorAxis),bestVerticalEllipse.angle-45.0,0,360,cv::Scalar(255,255,255));
 
     std::pair<bool, Point> result(false, Point(0,0));
     if(bestHorizontalEllipse.score > 30.0f && bestVerticalEllipse.score > 30.0f && ellipsesDist < 15.0f && bestHorizontalEllipse.majorAxis > bestVerticalEllipse.majorAxis*1.3f) {
         result.first = true;
-        result.second = Point(bestHorizontalEllipse.y, bestHorizontalEllipse.x);
+        result.second = Point(bestHorizontalEllipse.x, bestHorizontalEllipse.y);
     }
 
     return result;
