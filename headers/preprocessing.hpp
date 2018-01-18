@@ -8,10 +8,7 @@
 #include <vector>
 #include <string>
 #include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc.hpp>
 #include "utils.hpp"
-#include "shapeRecognition.hpp"
 #include "kernels.hpp"
 
 cv::Mat preprocessing(cv::Mat image);

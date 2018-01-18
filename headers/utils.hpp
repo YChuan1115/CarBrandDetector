@@ -11,6 +11,7 @@
 
 #include "../headers/kernels.hpp"
 
+void threshold(cv::Mat &image, unsigned int threshold);
 
 cv::Mat magnitude(const cv::Mat image_x, const cv::Mat image_y);
 

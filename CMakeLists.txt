@@ -3,6 +3,7 @@ project(CarBrandDetector)
 project(CarBrandDetectorTest)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -O3")
 
 FIND_PACKAGE( OpenCV REQUIRED )
 

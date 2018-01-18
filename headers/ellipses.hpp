@@ -54,9 +54,9 @@ std::pair<bool, Point> find2Ellipses(cv::Mat & image, cv::Mat & color_image);
 
 std::vector<EllipseDetection> ellipseDetection(const cv::Mat image, const EllipseDetectionParams params);
 
-std::vector<Point> getNonZeroPoints(const cv::Mat image);
+std::vector<Point> getNonZeroPoints(const cv::Mat &image);
 
-std::vector<float> computePairwiseDistances(const std::vector<Point> points);
+std::vector<float> computePairwiseDistances(const std::vector<Point> &points);
 
 float calculateDistance( const float x1, const float x2, const float y1, const float y2);
 

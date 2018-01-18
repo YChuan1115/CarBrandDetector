@@ -7,6 +7,18 @@
 
 
 
+void threshold(cv::Mat &image, unsigned int threshold){
+    for(int x=0; x < image.rows; ++x){
+        for(int y=0; y<image.cols; ++y){
+            if( image.at<uchar>(x,y) >= threshold){
+                image.at<uchar>(x,y) = 255;
+            }else{
+                image.at<uchar>(x,y) = 0;
+            }
+        }
+    }
+}
+
 cv::Mat magnitude(const cv::Mat image_x, const cv::Mat image_y){
     cv::Mat magnitude = cv::Mat(image_x.rows,image_x.cols, CV_8UC1);
     for(int x=0; x < image_x.rows; ++x){
@@ -59,14 +71,14 @@ template <class T,size_t filterDimension>
 cv::Mat convolutionMultiChannel(cv::Mat I, matrix<T,filterDimension,filterDimension>(filterArray)){
     cv::Mat_<cv::Vec3b> _I = I;
     cv::Mat_<cv::Vec3b> filteredI(I.rows, I.cols);
-    for (int i = filterDimension; i < I.rows - filterDimension; ++i){
-        for (int j = filterDimension; j < I.cols - filterDimension; ++j){
+    for (unsigned int i = filterDimension; i < I.rows - filterDimension; ++i){
+        for (unsigned int j = filterDimension; j < I.cols - filterDimension; ++j){
             for (int chan = 0; chan < I.channels(); ++chan){
                 //convolution
                 float newVal = 0;
                 float division = 0;
-                for (int x = 0; x < filterDimension; ++x){
-                    for (int y = 0; y < filterDimension; ++y){
+                for (unsigned int x = 0; x < filterDimension; ++x){
+                    for (unsigned int y = 0; y < filterDimension; ++y){
                         newVal += (float)_I.at<cv::Vec3b>(i + x -1  , j + y-1 )[chan] * filterArray[x][y];
                         division += filterArray[x][y];
                     }
@@ -95,14 +107,14 @@ cv::Mat convolutionSingleChannel(const cv::Mat I, matrix<T,filterDimension,filte
             filteredI.at<uchar>(i,j) = I.at<uchar>(i,j);
         }
     }
-    for (int i = filterDimension; i < I.rows - filterDimension; ++i){
-        for (int j = filterDimension; j < I.cols - filterDimension; ++j){
+    for (unsigned int i = filterDimension; i < I.rows - filterDimension; ++i){
+        for (unsigned int j = filterDimension; j < I.cols - filterDimension; ++j){
 
                 //convolution
                 float newVal = 0;
                 float division = 0;
-                for (int x = 0; x < filterDimension; ++x){
-                    for (int y = 0; y < filterDimension; ++y){
+                for (unsigned int x = 0; x < filterDimension; ++x){
+                    for (unsigned int y = 0; y < filterDimension; ++y){
                         newVal += (float)_I.at<uchar>(i + x -1  , j + y-1 ) * filterArray[x][y];
                         division += filterArray[x][y];
                     }
