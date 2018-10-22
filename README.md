@@ -11,8 +11,8 @@ Reference paper:
 > detection with result clustering." Computer as a Tool, 2005. EUROCON 2005. The International
 > Conference on. Vol. 2. IEEE, 2005.
 
-Project was written in C++. As it was written for educational purposes it does not use built in OpenCV algorithms and structures other then the cv::Mat class 
-that is used to store the processed images. Drawing function are used as well to highlight found toyota signs.
+Project was written in C++. As it was written for educational purposes it intentionally does not use built-in OpenCV algorithms and structures other then the cv::Mat class 
+that is used to store the processed images. Drawing functions are used as well to highlight found toyota signs.
 
 ## Project building
 
